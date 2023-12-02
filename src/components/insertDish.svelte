@@ -1,4 +1,5 @@
 <script lang="jsdoc">
+	import { func } from 'joi';
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
 	/**
@@ -144,6 +145,27 @@
 			});
 		}
 	}
+	/**
+	 * An array of tags. Each tag is an object with an `id` and a `tag_name`.
+	 * @type {Array<{id: number, tag_name: string}>}
+	 */
+	let tags = [];
+
+	async function getTags() {
+		const response = await fetch('http://localhost:5000/data/admin/tags', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		tags = await response.json();
+		console.log('Tags:', tags);
+	}
+
+	$: {
+		getTags();
+	}
 </script>
 
 <h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
@@ -196,6 +218,17 @@
 		placeholder="Price you want to sell the dish for (€)"
 		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
 	/>
+	<label for="category_id" class="block text-sm font-medium text-gray-700">Category name</label>
+	<select
+		bind:value={dish.categoryName}
+		id="category_id"
+		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+	>
+		<option value="">Select a category</option>
+		{#each categories as category}
+			<option value={category}>{category}</option>
+		{/each}
+	</select>
 	<label for="is_pizza" class="block text-sm font-medium text-gray-700"
 		>Is this new dish a pizza?</label
 	>
@@ -221,46 +254,18 @@
 	</label>
 
 	<label for="tags" class="mt-3 block text-sm font-medium text-gray-700">Tags</label>
-	<label class="block">
-		<input
-			id="category_id_nuovo"
-			type="checkbox"
-			value="1"
-			class="mr-1 font-medium text-gray-700"
-		/>
-		Nuovo
-	</label>
-
-	<label class="block">
-		<input
-			id="category_id_cereali"
-			type="checkbox"
-			value="2"
-			class="mr-1 font-medium text-gray-700"
-		/>
-		Cereali
-	</label>
-
-	<label class="block">
-		<input
-			id="category_id_surgelato"
-			type="checkbox"
-			value="3"
-			class="mr-1 font-medium text-gray-700"
-		/>
-		Surgelato
-	</label>
-	<label for="category_id" class="block text-sm font-medium text-gray-700">Category name</label>
-	<select
-		bind:value={dish.categoryName}
-		id="category_id"
-		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-	>
-		<option value="">Select a category</option>
-		{#each categories as category}
-			<option value={category}>{category}</option>
-		{/each}
-	</select>
+	{#each tags as tag (tag.id)}
+		<label class="block">
+			<input
+				id={`category_id_${tag.tag_name}`}
+				type="checkbox"
+				value={tag.id}
+				bind:group={dish.tags}
+				class="mr-1 font-medium text-gray-700"
+			/>
+			{tag.tag_name}
+		</label>
+	{/each}
 
 	<button
 		type="submit"
