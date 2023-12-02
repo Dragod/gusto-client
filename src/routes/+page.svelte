@@ -1,0 +1,545 @@
+<script lang="jsdoc">
+	import { onMount } from 'svelte';
+	import { toasts, ToastContainer, FlatToast } from 'svelte-toasts';
+	import schema from '../validation/schema';
+	import NavButtons from '../components/navButtons.svelte';
+	import InsertDish from '../components/insertDish.svelte';
+	import Business from '../components/business.svelte';
+	import SortBy from '../components/sortBy.svelte';
+	import Categories from '../components/categories.svelte';
+
+	let activeButton = 'updateMenu';
+
+	/**
+	 * @type {any[]}
+	 */
+	let dataSort = [];
+
+	/**
+	 * @type {any}
+	 */
+	let errors = {};
+
+	/**
+	 * @type {any[]}
+	 */
+	let data = [];
+
+	/**
+	 * @type {any}
+	 */
+	let editingId = null;
+	let updatedData = { name: '', description: '', price: '', is_pizza: '' };
+	let showError = false;
+
+	async function fetchData() {
+		try {
+			const response = await fetch('http://localhost:5000/data/admin/menu');
+			if (!response.ok) {
+				throw new Error('Failed to fetch data');
+			}
+			data = await response.json();
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	onMount(async () => {
+		await fetchData();
+	});
+
+	/**
+	 * @param {number} id
+	 */
+	function startEditing(id) {
+		showError = false;
+		const dish = data.find((item) => item.id === id);
+		editingId = id;
+		updatedData = { ...dish };
+	}
+
+	async function stopEditing() {
+		showError = true;
+		try {
+			if (editingId === null) {
+				console.error('stopEditing was called before startEditing');
+				return;
+			}
+
+			const originalData = data.find((item) => item.id === editingId);
+
+			if (JSON.stringify(originalData) === JSON.stringify(updatedData)) {
+				console.log('No changes detected, not sending PATCH request');
+			} else {
+				/**Reset errors*/
+				errors = {};
+
+				const { error } = schema.validate(updatedData, { abortEarly: false });
+
+				if (error) {
+					console.log('error', error);
+					console.log('updatedData', updatedData);
+					error.details.forEach((detail) => {
+						errors[detail.path[0]] = detail.message;
+					});
+
+					throw new Error('Validation error');
+				} else {
+					errors = {};
+
+					const response = await fetch(`http://localhost:5000/data/admin/menu/${editingId}`, {
+						method: 'PATCH',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(updatedData)
+					});
+
+					if (!response.ok) {
+						throw new Error(`HTTP error! status: ${response.status}`);
+					} else {
+						console.log('Changes saved successfully');
+						toasts.success({
+							title: 'Success',
+							description: 'Menu changes saved.',
+							type: 'success',
+							duration: 6000,
+							placement: 'bottom-center'
+						});
+					}
+
+					//Refresh data
+					await fetchData();
+				}
+			}
+
+			editingId = null;
+			updatedData = { name: '', description: '', price: '', is_pizza: '' };
+		} catch (error) {
+			console.error('Could not save changes, validation error/s.', error);
+			toasts.error({
+				title: 'Validation Error',
+				description: "Could not save changes, please make sure you're inserting the correct data.",
+				type: 'warning',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
+		}
+	}
+
+	let filter = '';
+
+	$: filteredData = data.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()));
+
+	// Whenever dataSort or filter changes, update filteredData
+	$: {
+		if (dataSort.length > 0) {
+			filteredData = dataSort.filter((item) =>
+				item.name.toLowerCase().includes(filter.toLowerCase())
+			);
+		} else {
+			filteredData = data.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()));
+		}
+	}
+
+	/**
+	 * @param {number} delete_id
+	 * @param {string} name
+	 */
+	async function deleteDish(delete_id, name) {
+		const response = await fetch(`http://localhost:5000/data/admin/menu/${delete_id}`, {
+			method: 'DELETE'
+		});
+
+		if (response.ok) {
+			// Refresh the list after successful delete
+			await fetchData();
+			toasts.success({
+				title: 'Delete dish',
+				description: 'Dish deleted successfully.' + name,
+				type: 'info',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
+		} else {
+			console.error('Failed to delete dish');
+			toasts.error({
+				title: 'Delete dish',
+				description: 'Failed to delete dish.',
+				type: 'error',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
+		}
+	}
+</script>
+
+<!-- Toaster -->
+<ToastContainer placement="bottom-right" let:data>
+	<FlatToast {data} />
+</ToastContainer>
+
+<div class="flex flex-col h-screen min-w-full p-8 bg-slate-50">
+	<header class="flex flex-row">
+		<svg
+			width="100%"
+			height="100%"
+			viewBox="0 0 233 233"
+			version="1.1"
+			xmlns="http://www.w3.org/2000/svg"
+			xmlns:xlink="http://www.w3.org/1999/xlink"
+			xml:space="preserve"
+			style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"
+			class="w-12 h-12"
+		>
+			<g transform="matrix(1,0,0,1,-304.779,-157.842)">
+				<g transform="matrix(1,0,0,1,343.353,312.536)">
+					<path
+						d="M0,-76.933C0,-98.57 17.54,-116.11 39.177,-116.11C60.813,-116.11 78.353,-98.57 78.353,-76.933C78.353,-55.296 60.813,-37.756 39.177,-37.756C17.54,-37.756 0,-55.296 0,-76.933M38.743,39.103C38.743,60.459 56.056,77.761 77.411,77.761L77.411,0.828L116.418,0.828C137.734,0.828 155.015,-16.44 155.015,-37.756L106.356,-37.756C113.08,-49.261 116.938,-62.646 116.938,-76.933C116.938,-77.028 116.934,-77.122 116.934,-77.216L155.112,-77.216C176.455,-77.216 193.758,-94.621 193.758,-115.965L106.442,-115.965C92.976,-139.123 67.896,-154.694 39.177,-154.694C-3.77,-154.694 -38.575,-119.879 -38.575,-76.933L-38.575,1.277C-38.575,22.633 -21.263,39.926 0.093,39.926L0.083,-9.748C11.473,-3.092 24.617,0.748 38.743,0.824L38.743,39.103Z"
+						style="fill:rgb(255,36,120);fill-rule:nonzero;"
+					/>
+				</g>
+			</g>
+		</svg>
+		<h1 class="text-4xl font-bold text-gray-800 pl-5 p-1">Pfcode Admin</h1>
+	</header>
+
+	<div class="flex flex-row items-center p-1">
+		<NavButtons bind:activeButton />
+	</div>
+
+	<hr class="border-t-2 border-gray-200 p-1" />
+	{#if activeButton === 'updateMenu'}
+		<div class="update-menu flex flex-col overflow-auto p-1">
+			<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Menu</h1>
+			<label for="filter" class="block text-sm font-medium text-gray-700">Filter list</label>
+			<input
+				id="filter"
+				type="text"
+				bind:value={filter}
+				placeholder="Filter by name"
+				class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+			/>
+
+			<div class="flex items-center py-4 pb-6">
+				<SortBy bind:dataSort />
+			</div>
+			<div class="flex-grow overflow-auto mb-6 h-full scrollbar">
+				<div class="grid grid-cols-11 gap-1 w-full">
+					<div class="col-start-1 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Name</div>
+					<div class="col-start-3 col-span-3 bg-gray-300 p-2 sticky top-0 font-bold">
+						Description
+					</div>
+					<div class="col-start-6 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Price - €</div>
+					<div class="col-start-7 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Is pizza</div>
+					<div class="col-start-8 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Tags</div>
+					<div class="col-start-9 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Category</div>
+					<div class="col-start-11 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Actions</div>
+					{#each filteredData as item, index (index)}
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-2 p-2 min-h-[60px]`}
+						>
+							{#if editingId === item.id}
+								<input
+									type="text"
+									class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+									bind:value={updatedData.name}
+									placeholder="Name"
+								/>
+								{#if showError && errors.name}
+									<small class="text text-rose-600">{errors.name}</small>
+								{/if}
+							{:else}
+								{item.name}
+							{/if}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-3 p-2 min-h-[60px]`}
+						>
+							{#if editingId === item.id}
+								<input
+									type="text"
+									class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+									bind:value={updatedData.description}
+									placeholder="Description"
+								/>
+								{#if showError && errors.description}
+									<small class="text text-rose-600">{errors.description}</small>
+								{/if}
+							{:else}
+								{item.description}
+							{/if}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
+						>
+							{#if editingId === item.id}
+								<input
+									type="number"
+									class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+									bind:value={updatedData.price}
+									placeholder="Price"
+								/>
+								{#if showError && errors.price}
+									<small class="text text-rose-600">{errors.price}</small>
+								{/if}
+							{:else}
+								{item.price}
+							{/if}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
+						>
+							{#if editingId === item.id}
+								<input
+									type="number"
+									class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+									bind:value={updatedData.is_pizza}
+									placeholder="Is pizza"
+								/>
+								{#if showError && errors.is_pizza}
+									<small class="text text-rose-600">{errors.is_pizza}</small>
+								{/if}
+							{:else}
+								{item.is_pizza}
+							{/if}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
+						>
+							{#if item.tags == null}
+								No tags
+							{:else}
+								{item.tags}
+							{/if}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-2 p-2 min-h-[60px]`}
+						>
+							{item.category_name}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
+						>
+							{#if editingId === item.id}
+								<button class="w-5 h-5 ml-4" on:click={stopEditing} aria-label="Save"
+									><svg
+										width="100%"
+										height="100%"
+										viewBox="0 0 251 251"
+										version="1.1"
+										xmlns="http://www.w3.org/2000/svg"
+										xmlns:xlink="http://www.w3.org/1999/xlink"
+										xml:space="preserve"
+										style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2;"
+									>
+										<g transform="matrix(1,0,0,1,-1875,-1458.33)">
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M483.567,409L454,409C452.343,409 451,407.657 451,406L451,360L460,351L492,351C493.657,351 495,352.343 495,354L495,378.028"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M462,355L462,361L456,361"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M466.5,373L485.5,373"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M466.5,385L481.729,385"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M466.5,397L478.028,397"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M462,373C462,371.896 461.104,371 460,371C458.896,371 458,371.896 458,373C458,374.104 458.896,375 460,375C461.104,375 462,374.104 462,373Z"
+													style="fill:rgb(61,62,68);fill-rule:nonzero;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M462,385C462,383.896 461.104,383 460,383C458.896,383 458,383.896 458,385C458,386.104 458.896,387 460,387C461.104,387 462,386.104 462,385Z"
+													style="fill:rgb(61,62,68);fill-rule:nonzero;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M462,397C462,395.896 461.104,395 460,395C458.896,395 458,395.896 458,397C458,398.104 458.896,399 460,399C461.104,399 462,398.104 462,397Z"
+													style="fill:rgb(61,62,68);fill-rule:nonzero;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M509,396C509,388.82 503.18,383 496,383C488.82,383 483,388.82 483,396C483,403.18 488.82,409 496,409C503.18,409 509,403.18 509,396Z"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M491,396.5L494,399.5L501,392.5"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+										</g>
+									</svg>
+								</button>
+							{:else}
+								<button
+									class="w-5 h-5 ml-4"
+									type="button"
+									on:click={() => startEditing(item.id)}
+									aria-label="Edit"
+								>
+									<svg
+										width="100%"
+										height="100%"
+										viewBox="0 0 247 261"
+										version="1.1"
+										xmlns="http://www.w3.org/2000/svg"
+										xmlns:xlink="http://www.w3.org/1999/xlink"
+										xml:space="preserve"
+										style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-miterlimit:2;"
+									>
+										<g transform="matrix(1,0,0,1,-1457.35,-619.85)">
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M398,193.06L398,206.478C398,207.871 396.855,209 395.444,209L354.556,209C353.145,209 352,207.871 352,206.478L352,157.827C352,157.492 352.135,157.171 352.374,156.935L358.015,151.369C358.254,151.133 358.579,151 358.918,151L395.444,151C396.855,151 398,152.129 398,153.522L398,165.201"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M362,155L362,161L356,161"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M380.572,200.938L372,204L375.062,195.428L401.238,169.251C402.845,167.645 405.38,167.576 406.902,169.098C408.424,170.62 408.355,173.156 406.749,174.762L380.572,200.938Z"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M400.269,170.221L405.779,175.731"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M398.33,172.16L403.841,177.67"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M376.031,194.458L381.542,199.969"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M360,172L386,172"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+											<g transform="matrix(4.16667,0,0,4.16667,0,0)">
+												<path
+													d="M360,182L378,182"
+													style="fill:none;stroke:rgb(61,62,68);stroke-width:2px;stroke-linejoin:round;"
+												/>
+											</g>
+										</g>
+									</svg>
+								</button>
+							{/if}
+							<button
+								on:click={() => {
+									if (confirm(`Are you sure you want to delete this dish, ${item.name}?`)) {
+										deleteDish(item.id, item.name);
+									}
+								}}
+								class="w-5 h-5 ml-4"
+								><svg
+									width="100%"
+									height="100%"
+									viewBox="0 0 33 36"
+									version="1.1"
+									xmlns="http://www.w3.org/2000/svg"
+									xmlns:xlink="http://www.w3.org/1999/xlink"
+									xml:space="preserve"
+									style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2;"
+								>
+									<g transform="matrix(1,0,0,1,-1935.51,-741.539)">
+										<g>
+											<path
+												d="M1964,748.055L1962.28,772.362C1962.12,774.446 1960.39,776.055 1958.3,776.055L1945.7,776.055C1943.61,776.055 1941.88,774.446 1941.72,772.362L1940,748.055"
+												style="fill:none;stroke:black;stroke-width:1.03px;"
+											/>
+											<path
+												d="M1936,748.055L1968,748.055"
+												style="fill:none;stroke:black;stroke-width:0.99px;"
+											/>
+											<path
+												d="M1948,748.055L1948,744.055C1948,742.95 1948.9,742.055 1950,742.055L1954,742.055C1955.1,742.055 1956,742.95 1956,744.055L1956,748.055"
+												style="fill:none;stroke:black;stroke-width:1.03px;"
+											/>
+											<path
+												d="M1948,768.055L1948,756.055"
+												style="fill:none;stroke:black;stroke-width:0.97px;"
+											/>
+											<path
+												d="M1956,768.055L1956,756.055"
+												style="fill:none;stroke:black;stroke-width:0.95px;"
+											/>
+										</g>
+									</g>
+								</svg>
+							</button>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{/if}
+	{#if activeButton === 'addRemoveCategory'}
+		<Categories />
+	{/if}
+	{#if activeButton === 'addDish'}
+		<InsertDish />
+	{/if}
+	{#if activeButton === 'updateBusiness'}
+		<Business />
+	{/if}
+</div>
+
+<style>
+</style>
