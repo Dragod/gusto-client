@@ -29,7 +29,7 @@ const schema = Joi.object({
 		'number.max': 'Is pizza must be at most 1.'
 	}),
 
-	tags: Joi.string().optional(),
+	tags: Joi.array().allow(null).default([]).optional(),
 
 	id: Joi.number().optional(),
 
