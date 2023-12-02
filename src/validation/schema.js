@@ -33,7 +33,9 @@ const schema = Joi.object({
 
 	id: Joi.number().optional(),
 
-	category_name: Joi.string().optional()
+	category_name: Joi.string().optional(),
+
+	businessId: Joi.number().optional()
 });
 
 export default schema;

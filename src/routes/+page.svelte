@@ -7,13 +7,8 @@
 	import Business from '../components/business.svelte';
 	import SortBy from '../components/sortBy.svelte';
 	import Categories from '../components/categories.svelte';
-
+	import { dataSort, selectedBusiness, sortByDefault } from '../store/sortStore';
 	let activeButton = 'updateMenu';
-
-	/**
-	 * @type {any[]}
-	 */
-	let dataSort = [];
 
 	/**
 	 * @type {any}
@@ -25,37 +20,56 @@
 	 */
 	let data = [];
 
+	// Subscribe to dataSort, this is needed to show the data when editing a dish since we now use a store.
+	dataSort.subscribe((value) => {
+		data = value;
+	});
+
 	/**
 	 * @type {any}
 	 */
 	let editingId = null;
+	/**
+	 * @type {{ name: string, description: string, price: string, is_pizza: string } | null}
+	 */
+	let originalData = null;
 	let updatedData = { name: '', description: '', price: '', is_pizza: '' };
 	let showError = false;
 
-	async function fetchData() {
+	async function getMenu() {
 		try {
-			const response = await fetch('http://localhost:5000/data/admin/menu');
-			if (!response.ok) {
-				throw new Error('Failed to fetch data');
-			}
-			data = await response.json();
+			await sortByDefault();
 		} catch (error) {
 			console.error(error);
 		}
 	}
 
+	// Call getMenu whenever selectedBusiness changes
+	$: getMenu(), selectedBusiness;
+
+	/**
+	 * @param {number} businessId
+	 */
+
+	function selectBusiness(businessId) {
+		selectedBusiness.set(businessId); // Set the selected business
+		sortByDefault(); // Reset the sort by to default
+	}
+
 	onMount(async () => {
-		await fetchData();
+		await getMenu();
 	});
 
 	/**
 	 * @param {number} id
+	 * @param {number} businessId
 	 */
-	function startEditing(id) {
+	function startEditing(id, businessId) {
 		showError = false;
 		const dish = data.find((item) => item.id === id);
 		editingId = id;
-		updatedData = { ...dish };
+		originalData = { ...dish, businessId };
+		updatedData = { ...dish, businessId };
 	}
 
 	async function stopEditing() {
@@ -65,8 +79,6 @@
 				console.error('stopEditing was called before startEditing');
 				return;
 			}
-
-			const originalData = data.find((item) => item.id === editingId);
 
 			if (JSON.stringify(originalData) === JSON.stringify(updatedData)) {
 				console.log('No changes detected, not sending PATCH request');
@@ -109,12 +121,13 @@
 					}
 
 					//Refresh data
-					await fetchData();
+					await getMenu();
 				}
 			}
 
 			editingId = null;
 			updatedData = { name: '', description: '', price: '', is_pizza: '' };
+			originalData = null;
 		} catch (error) {
 			console.error('Could not save changes, validation error/s.', error);
 			toasts.error({
@@ -133,8 +146,8 @@
 
 	// Whenever dataSort or filter changes, update filteredData
 	$: {
-		if (dataSort.length > 0) {
-			filteredData = dataSort.filter((item) =>
+		if ($dataSort.length > 0) {
+			filteredData = $dataSort.filter((item) =>
 				item.name.toLowerCase().includes(filter.toLowerCase())
 			);
 		} else {
@@ -153,7 +166,7 @@
 
 		if (response.ok) {
 			// Refresh the list after successful delete
-			await fetchData();
+			await getMenu();
 			toasts.success({
 				title: 'Delete dish',
 				description: 'Dish deleted successfully.' + name,
@@ -179,7 +192,7 @@
 	<FlatToast {data} />
 </ToastContainer>
 
-<div class="flex flex-col h-screen min-w-full p-8 bg-slate-50">
+<div class="flex flex-col h-screen min-w-full p-6 pt-4 bg-slate-50">
 	<header class="flex flex-row">
 		<svg
 			width="100%"
@@ -212,6 +225,28 @@
 	{#if activeButton === 'updateMenu'}
 		<div class="update-menu flex flex-col overflow-auto p-1">
 			<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Menu</h1>
+			<div class="flex flex-col pb-6">
+				<label for="business" class="pb-2 text-sm font-medium">Business</label>
+				<div class="flex flex-row">
+					<button
+						class={`mr-4 px-2 py-1 rounded ${
+							$selectedBusiness === 1 ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
+						}`}
+						on:click={() => selectBusiness(1)}
+						type="button">Senigallia</button
+					>
+					<button
+						class={`mr-4 px-2 py-1 rounded ${
+							$selectedBusiness === 2 ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
+						}`}
+						on:click={() => selectBusiness(2)}
+						type="button">Trecastelli</button
+					>
+				</div>
+			</div>
+			<div class="flex flex-col pb-6">
+				<SortBy />
+			</div>
 			<label for="filter" class="block text-sm font-medium text-gray-700">Filter list</label>
 			<input
 				id="filter"
@@ -220,10 +255,6 @@
 				placeholder="Filter by name"
 				class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
 			/>
-
-			<div class="flex items-center py-4 pb-6">
-				<SortBy bind:dataSort />
-			</div>
 			<div class="flex-grow overflow-auto mb-6 h-full scrollbar">
 				<div class="grid grid-cols-11 gap-1 w-full">
 					<div class="col-start-1 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Name</div>
@@ -415,7 +446,7 @@
 								<button
 									class="w-5 h-5 ml-4"
 									type="button"
-									on:click={() => startEditing(item.id)}
+									on:click={() => startEditing(item.id, $selectedBusiness)}
 									aria-label="Edit"
 								>
 									<svg
