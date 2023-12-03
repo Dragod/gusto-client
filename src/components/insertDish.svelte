@@ -2,13 +2,13 @@
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
 	/**
-	 * @type {{name: string, description: string, price: string, isPizza: string, tags: string[], categoryName: string, businessId: number}}
+	 * @type {{name: string, description: string, price: string, is_pizza: string, tags: string[], categoryName: string, businessId: number}}
 	 */
 	let dish = {
 		name: '',
 		description: '',
 		price: '',
-		isPizza: '0',
+		is_pizza: '0',
 		tags: [],
 		categoryName: '',
 		businessId: 1
@@ -70,6 +70,13 @@
 			return catId[0].id.toString();
 		} catch (error) {
 			console.error('Failed to fetch category ID:', error);
+			toasts.error({
+				title: 'Insert dish',
+				description: 'Failed to fetch category ID. Please, make sure you selected a category.',
+				type: 'error',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
 			return null;
 		}
 	}
@@ -104,6 +111,8 @@
 
 		// Create a new object with the dish data and the category ID
 		const dishToInsert = { ...dish, categoryId: categoryId };
+		console.log('is pizza value:', dishToInsert.is_pizza);
+		console.log('is pizza typeof:', typeof dishToInsert.is_pizza);
 
 		console.log('Sending this payload:', dishToInsert);
 
@@ -128,7 +137,7 @@
 				name: '',
 				description: '',
 				price: '',
-				isPizza: '0',
+				is_pizza: '0',
 				tags: [],
 				categoryName: '',
 				businessId: 0
@@ -137,7 +146,8 @@
 			console.error('Failed to insert dish');
 			toasts.error({
 				title: 'Insert dish',
-				description: 'Failed to insert dish.',
+				description:
+					'Failed to insert dish. Please, make sure you filled all the fields correctly.',
 				type: 'error',
 				duration: 6000,
 				placement: 'bottom-center'
@@ -188,7 +198,7 @@
 			bind:group={dish.businessId}
 			type="radio"
 			value="2"
-			class="mr-1 font-medium text-gray-700"
+			class="mr-1 mb-6 font-medium text-gray-700"
 		/>
 		Trecastelli
 	</label>
@@ -234,7 +244,7 @@
 	<label class="block">
 		<input
 			id="is_pizza_no"
-			bind:group={dish.isPizza}
+			bind:group={dish.is_pizza}
 			type="radio"
 			value="0"
 			class="mr-1 font-medium text-gray-700"
@@ -244,7 +254,7 @@
 	<label class="block">
 		<input
 			id="is_pizza_yes"
-			bind:group={dish.isPizza}
+			bind:group={dish.is_pizza}
 			type="radio"
 			value="1"
 			class="mr-1 font-medium text-gray-700"
@@ -252,7 +262,7 @@
 		Yes
 	</label>
 
-	<label for="tags" class="mt-3 block text-sm font-medium text-gray-700">Tags</label>
+	<label for="tags" class="mt-3 block text-sm font-medium text-gray-700">Tags (optional)</label>
 	{#each tags as tag (tag.id)}
 		<label class="block">
 			<input
