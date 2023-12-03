@@ -161,7 +161,7 @@
 	async function deleteItem(id, name) {
 		openModal(
 			`Delete Category`,
-			`Are you sure you want to delete this category: ${name}?`,
+			`Are you sure you want to delete this category: <strong>${name}</strong>?`,
 			() => {
 				deleteCategory(id);
 			},
