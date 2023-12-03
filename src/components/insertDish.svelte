@@ -112,10 +112,8 @@
 
 		// Create a new object with the dish data and the category ID
 		const dishToInsert = { ...dish, categoryId: categoryId };
-		console.log('is pizza value:', dishToInsert.is_pizza);
-		console.log('is pizza typeof:', typeof dishToInsert.is_pizza);
 
-		console.log('Sending this payload:', dishToInsert);
+		console.log('Sending payload:', dishToInsert);
 
 		// Validate the dishToInsert object
 		const { error } = schema.validate(dishToInsert);
@@ -194,7 +192,12 @@
 </script>
 
 <h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
-<form class="flex-grow overflow-auto mb-6 h-full" on:submit|preventDefault={insertDish}>
+<form
+	class="flex-grow overflow-auto mb-6 h-full"
+	on:submit|preventDefault={() => {
+		insertDish();
+	}}
+>
 	<label for="business_id" class="block text-sm font-medium text-gray-700 mb-4"
 		>Business location</label
 	>
@@ -293,10 +296,10 @@
 			<span class="ml-2">{tag.tag_name}</span>
 		</label>
 	{/each}
+	<hr class="border-t-2 mt-8 border-gray-200 p-1" />
 	<button
 		type="submit"
-		class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded block mt-3"
-		>Insert dish</button
+		class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded block mt-6">Insert new</button
 	>
 </form>
 
