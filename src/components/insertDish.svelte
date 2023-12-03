@@ -1,5 +1,4 @@
 <script lang="jsdoc">
-	import { func } from 'joi';
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
 	/**

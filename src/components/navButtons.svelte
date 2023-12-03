@@ -29,52 +29,27 @@
 	async function handleRefresh() {
 		await fetchData();
 	}
+
+	const buttons = [
+		{ state: 'updateMenu', label: 'Menu', refresh: true },
+		{ state: 'addDish', label: 'Insert dish' },
+		{ state: 'addRemoveCategory', label: 'Categories' },
+		{ state: 'updateBusiness', label: 'Business' },
+		{ state: 'tags', label: 'Tags' }
+	];
 </script>
 
-<button
-	class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === 'updateMenu'
-		? 'text-green-500 underline'
-		: ''}"
-	on:click={() => {
-		activeButton = 'updateMenu';
-		handleRefresh();
-	}}
->
-	Menu
-</button>
-<p class="px-2">|</p>
-<button
-	class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === 'addDish'
-		? 'text-green-500 underline'
-		: ''}"
-	on:click={() => (activeButton = 'addDish')}
->
-	Insert dish
-</button>
-<p class="px-2">|</p>
-<button
-	class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === 'addRemoveCategory'
-		? 'text-green-500 underline'
-		: ''}"
-	on:click={() => (activeButton = 'addRemoveCategory')}
->
-	Categories
-</button>
-<p class="px-2">|</p>
-<button
-	class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === 'updateBusiness'
-		? 'text-green-500 underline'
-		: ''}"
-	on:click={() => (activeButton = 'updateBusiness')}
->
-	Business
-</button>
-<p class="px-2">|</p>
-<button
-	class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === 'tags'
-		? 'text-green-500 underline'
-		: ''}"
-	on:click={() => (activeButton = 'tags')}
->
-	Tags
-</button>
+{#each buttons as { state, label, refresh }}
+	<button
+		class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === state
+			? 'text-green-500 underline'
+			: ''}"
+		on:click={() => {
+			activeButton = state;
+			if (refresh) handleRefresh();
+		}}
+	>
+		{label}
+	</button>
+	<p class="px-2">|</p>
+{/each}

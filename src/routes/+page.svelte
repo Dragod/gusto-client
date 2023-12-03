@@ -1,13 +1,13 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts, ToastContainer, FlatToast } from 'svelte-toasts';
-	import schema from '../validation/schema';
+	import schema from '../validation/update-dish';
 	import NavButtons from '../components/navButtons.svelte';
 	import InsertDish from '../components/insertDish.svelte';
 	import Business from '../components/business.svelte';
 	import SortBy from '../components/sortBy.svelte';
 	import Categories from '../components/categories.svelte';
-	import { dataSort, selectedBusiness, sortByDefault } from '../store/sortStore';
+	import { dataSort, selectedBusiness, sortBy } from '../store/sortBy';
 	let activeButton = 'updateMenu';
 
 	/**
@@ -38,7 +38,7 @@
 
 	async function getMenu() {
 		try {
-			await sortByDefault();
+			await sortBy('default');
 		} catch (error) {
 			console.error(error);
 		}
@@ -53,7 +53,7 @@
 
 	function selectBusiness(businessId) {
 		selectedBusiness.set(businessId); // Set the selected business
-		sortByDefault(); // Reset the sort by to default
+		sortBy('default'); // Reset the sort by to default
 	}
 
 	onMount(async () => {
