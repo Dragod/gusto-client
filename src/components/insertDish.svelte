@@ -1,6 +1,7 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
+	import schema from '../validation/insert-dish';
 	/**
 	 * @type {{name: string, description: string, price: string, is_pizza: string, tags: string[], categoryName: string, businessId: number}}
 	 */
@@ -72,7 +73,7 @@
 			console.error('Failed to fetch category ID:', error);
 			toasts.error({
 				title: 'Insert dish',
-				description: 'Failed to fetch category ID. Please, make sure you selected a category.',
+				description: 'Category name not selected. Please, make sure you selected a category.',
 				type: 'error',
 				duration: 6000,
 				placement: 'bottom-center'
@@ -116,6 +117,20 @@
 
 		console.log('Sending this payload:', dishToInsert);
 
+		// Validate the dishToInsert object
+		const { error } = schema.validate(dishToInsert);
+		if (error) {
+			console.error('Validation error:', error.details[0].message);
+			toasts.error({
+				title: 'Validation Error',
+				description: error.details[0].message,
+				type: 'error',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
+			return;
+		}
+
 		const response = await fetch('http://localhost:5000/data/admin/menu', {
 			method: 'POST',
 			headers: {
@@ -154,6 +169,7 @@
 			});
 		}
 	}
+
 	/**
 	 * An array of tags. Each tag is an object with an `id` and a `tag_name`.
 	 * @type {Array<{id: number, tag_name: string}>}
@@ -179,28 +195,30 @@
 
 <h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
 <form class="flex-grow overflow-auto mb-6 h-full" on:submit|preventDefault={insertDish}>
-	<label for="business_id" class="block text-sm font-medium text-gray-700">Business location</label>
-	<label class="block">
+	<label for="business_id" class="block text-sm font-medium text-gray-700 mb-4"
+		>Business location</label
+	>
+	<label class="flex items-center mb-3 cursor-pointer">
 		<input
 			id="business_id_senigallia"
 			bind:group={dish.businessId}
 			type="radio"
 			value="1"
 			checked
-			class="mr-1 font-medium text-gray-700"
+			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
 		/>
-		Senigallia
+		<span class="ml-2">Senigallia</span>
 	</label>
 
-	<label class="block">
+	<label class="flex items-center mb-3 cursor-pointer">
 		<input
 			id="business_id_trecastelli"
 			bind:group={dish.businessId}
 			type="radio"
 			value="2"
-			class="mr-1 mb-6 font-medium text-gray-700"
+			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
 		/>
-		Trecastelli
+		<span class="ml-2">Trecastelli</span>
 	</label>
 
 	<label for="dish" class="block text-sm font-medium text-gray-700">Name</label>
@@ -238,44 +256,43 @@
 			<option value={category}>{category}</option>
 		{/each}
 	</select>
-	<label for="is_pizza" class="block text-sm font-medium text-gray-700"
+	<label for="is_pizza" class="block text-sm font-medium text-gray-700 mb-4"
 		>Is this new dish a pizza?</label
 	>
-	<label class="block">
+	<label class="flex items-center mb-3 cursor-pointer">
 		<input
 			id="is_pizza_no"
 			bind:group={dish.is_pizza}
 			type="radio"
 			value="0"
-			class="mr-1 font-medium text-gray-700"
+			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
 		/>
-		No
+		<span class="ml-2">No</span>
 	</label>
-	<label class="block">
+	<label class="flex items-center mb-3 cursor-pointer">
 		<input
 			id="is_pizza_yes"
 			bind:group={dish.is_pizza}
 			type="radio"
 			value="1"
-			class="mr-1 font-medium text-gray-700"
+			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
 		/>
-		Yes
+		<span class="ml-2">Yes</span>
 	</label>
-
-	<label for="tags" class="mt-3 block text-sm font-medium text-gray-700">Tags (optional)</label>
+	<label for="tags" class="mt-3 mb-4 block text-sm font-medium text-gray-700">Tags (optional)</label
+	>
 	{#each tags as tag (tag.id)}
-		<label class="block">
+		<label class="flex items-center mb-3 cursor-pointer">
 			<input
 				id={`category_id_${tag.tag_name}`}
 				type="checkbox"
 				value={tag.id}
 				bind:group={dish.tags}
-				class="mr-1 font-medium text-gray-700"
+				class="appearance-none bg-white bg-check h-6 w-6 border border-gray-200 rounded-md checked:bg-blue-600 checked:border-transparent focus:outline-none"
 			/>
-			{tag.tag_name}
+			<span class="ml-2">{tag.tag_name}</span>
 		</label>
 	{/each}
-
 	<button
 		type="submit"
 		class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded block mt-3"
@@ -283,4 +300,10 @@
 	>
 </form>
 
-<style></style>
+<style>
+	.bg-check {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z' fill='%23fff'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+</style>
