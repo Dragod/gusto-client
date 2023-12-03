@@ -7,6 +7,8 @@
 	import Business from '../components/business.svelte';
 	import SortBy from '../components/sortBy.svelte';
 	import Categories from '../components/categories.svelte';
+	import Modal from '../components/modal.svelte';
+	import { openModal } from '../store/modal';
 	import { dataSort, selectedBusiness, sortBy } from '../store/sortBy';
 	let activeButton = 'updateMenu';
 
@@ -188,7 +190,27 @@
 			});
 		}
 	}
+
+	/**
+	 * @param {number} id
+	 * @param {string} name
+	 */
+	async function deleteItem(id, name) {
+		openModal(
+			'Delete dish',
+			`Are you sure you want to delete this item: <strong>${name}<strong> ?`,
+			() => {
+				// Code to delete the item goes here
+				deleteDish(id, name);
+			},
+			() => {
+				// Code to run if the user clicks "No" goes here
+			}
+		);
+	}
 </script>
+
+<Modal />
 
 <!-- Toaster -->
 <ToastContainer placement="bottom-right" let:data>
@@ -517,9 +539,7 @@
 							{/if}
 							<button
 								on:click={() => {
-									if (confirm(`Are you sure you want to delete this dish, ${item.name}?`)) {
-										deleteDish(item.id, item.name);
-									}
+									deleteItem(item.id, item.name);
 								}}
 								class="w-5 h-5 ml-4"
 								><svg

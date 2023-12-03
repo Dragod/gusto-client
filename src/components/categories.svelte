@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
 	import schema from '../validation/categories-update';
+	import { openModal } from '../store/modal';
+	import Modal from './modal.svelte';
 
 	/**
 	 * @component Categories
@@ -151,7 +153,26 @@
 			console.error('Failed to delete category:', error);
 		}
 	}
+
+	/**
+	 * @param {number} id
+	 * @param {string} name
+	 */
+	async function deleteItem(id, name) {
+		openModal(
+			`Delete Category`,
+			`Are you sure you want to delete this category: ${name}?`,
+			() => {
+				deleteCategory(id);
+			},
+			() => {
+				console.log('No clicked');
+			}
+		);
+	}
 </script>
+
+<Modal />
 
 <div class="flex flex-col overflow-auto h-full">
 	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Categories</h1>
@@ -332,9 +353,7 @@
 					{/if}
 					<button
 						on:click={() => {
-							if (confirm(`Are you sure you want to delete this dish, ${item.category_name}?`)) {
-								deleteCategory(item.id);
-							}
+							deleteItem(item.id, item.category_name);
 						}}
 						class="w-5 h-5 ml-4"
 						><svg
