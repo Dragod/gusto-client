@@ -29,11 +29,14 @@
 	 * @type {any}
 	 */
 	let editingId = null;
+
 	/**
 	 * @type {{ name: string, description: string, price: string, is_pizza: string } | null}
 	 */
 	let originalData = null;
+
 	let updatedData = { name: '', description: '', price: '', is_pizza: '' };
+
 	let showError = false;
 
 	async function getMenu() {

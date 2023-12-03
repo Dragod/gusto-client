@@ -42,8 +42,8 @@
 {#each buttons as { state, label, refresh }}
 	<button
 		class="text-gray-800 mb-4 pt-4 hover:underline {activeButton === state
-			? 'text-green-500 underline cursor-default'
-			: 'cursor-pointer'}"
+			? 'text-green-500 underline '
+			: ''}"
 		on:click={() => {
 			activeButton = state;
 			if (refresh) handleRefresh();
