@@ -15,6 +15,14 @@
 		businessId: 1
 	};
 
+	// Convert the business ID to a string so that it is passed as default value to the radio buttons
+	let businessIdString = dish.businessId.toString();
+
+	// When the form is submitted, convert businessIdString back to a number and assign it to dish.businessId
+	function handleSubmit() {
+		dish.businessId = Number(businessIdString);
+	}
+
 	/**
 	 * @typedef {Object} Errors
 	 * @property {string} name
@@ -113,7 +121,7 @@
 		}
 	}
 
-	$: console.log('Business ID:', dish.businessId);
+	$: console.log('Business ID:', businessIdString);
 
 	// Reactive statement that watches for changes in dish.businessId
 	$: {
@@ -227,6 +235,7 @@
 		class="flex-grow overflow-auto mb-6 h-full"
 		on:submit|preventDefault={() => {
 			insertDish();
+			handleSubmit();
 		}}
 	>
 		<label for="business_id" class="block text-sm font-medium text-gray-700 mb-4"
@@ -235,7 +244,7 @@
 		<label class="flex items-center mb-3 cursor-pointer">
 			<input
 				id="business_id_senigallia"
-				bind:group={dish.businessId}
+				bind:group={businessIdString}
 				type="radio"
 				value="1"
 				checked
@@ -247,7 +256,7 @@
 		<label class="flex items-center mb-3 cursor-pointer">
 			<input
 				id="business_id_trecastelli"
-				bind:group={dish.businessId}
+				bind:group={businessIdString}
 				type="radio"
 				value="2"
 				class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
