@@ -192,7 +192,7 @@
 	 */
 	async function deleteItem(id, name) {
 		openModal(
-			`Delete dish: ${name}`,
+			`Delete dish - ${name}`,
 			'Are you sure you want to <strong>delete' +
 				'<' +
 				'/strong> dish, <strong>' +
@@ -261,7 +261,7 @@
 
 	<hr class="border-t-2 border-gray-200 p-1" />
 	{#if activeButton === 'updateMenu'}
-		<div class="update-menu flex flex-col overflow-auto p-1">
+		<div class="update-menu flex flex-col overflow-auto p-1" transition:fade={{ duration: 200 }}>
 			<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Menu</h1>
 			<div class="flex flex-col pb-6">
 				<label for="business" class="pb-2 text-sm font-medium text-gray-700">Business</label>

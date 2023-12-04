@@ -162,8 +162,13 @@
 	 */
 	async function deleteItem(id, name) {
 		openModal(
-			'Delete Category',
-			'Are you sure you want to delete this category, <strong>' + name + '<' + '/strong>?',
+			'Delete Category - ' + name,
+			'Are you sure you want to <strong>delete' +
+				'<' +
+				'/strong> category, <strong>' +
+				name +
+				'<' +
+				'/strong>?',
 			() => {
 				deleteCategory(id);
 				toasts.success({
@@ -189,7 +194,7 @@
 
 <Modal />
 
-<div class="flex flex-col overflow-auto h-full">
+<div class="flex flex-col overflow-auto h-full" transition:fade={{ duration: 200 }}>
 	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Categories</h1>
 	<div class="flex flex-grow overflow-auto mb-6 h-full">
 		<div class="grid grid-cols-6 gap-1 w-full overflow-auto">

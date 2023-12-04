@@ -192,7 +192,7 @@
 	}
 </script>
 
-<div class="flex flex-col h-full overflow-auto" transition:fade={{ duration: 100 }}>
+<div class="flex flex-col h-full overflow-auto" transition:fade={{ duration: 200 }}>
 	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
 	<form
 		class="flex-grow overflow-auto mb-6 h-full"
