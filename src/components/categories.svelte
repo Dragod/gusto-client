@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
 	import schema from '../validation/categories-update';
+	import schema1 from '../validation/categories-insert';
 	import { openModal } from '../store/modal';
 	import Modal from './modal.svelte';
 
@@ -22,7 +23,7 @@
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 			categoryData = await response.json();
-			console.log(categoryData); // Log categoryData after it has been assigned
+			//console.log(categoryData); // Log categoryData after it has been assigned
 		} catch (error) {
 			console.error('Failed to fetch category data:', error);
 		}
@@ -64,9 +65,9 @@
 		}
 		originalData = { ...category };
 		updatedData = { ...category };
-		console.log('startEditing id:', id);
-		console.log('categoryData:', categoryData);
-		console.log('category:', category);
+		//console.log('startEditing id:', id);
+		//console.log('categoryData:', categoryData);
+		//console.log('category:', category);
 	}
 
 	async function stopEditing() {
@@ -78,11 +79,6 @@
 			}
 
 			if (updatedData) {
-				if (!updatedData.category_name) {
-					console.error('Category name is required');
-					return;
-				}
-
 				// Validate the updatedData object
 				const { error } = schema.validate(updatedData);
 				if (error) {
@@ -122,10 +118,12 @@
 			updatedData = { category_name: '' };
 			originalData = null;
 			showError = false;
+			if (Object.keys(errors).length === 0) {
+				showError = false;
+			}
 			errors = {};
 			await fetchCategoryData();
 		} catch (error) {
-			console.error('Failed to update category:', error);
 			toasts.error({
 				title: 'Error',
 				description: 'Failed to update category: ' + error,
@@ -191,9 +189,29 @@
 	}
 
 	let newCategoryName = '';
+	let validationError = '';
+
+	function validateCategoryName() {
+		const { error } = schema1.validate({ category_name: newCategoryName });
+		validationError = error ? error.details[0].message : '';
+	}
 
 	async function addCategory() {
 		const businessIds = [1, 2];
+		const categoryData = { categoryName: newCategoryName, businessIds };
+
+		validateCategoryName();
+		if (validationError) {
+			toasts.error({
+				title: 'Validation Error',
+				description: validationError,
+				type: 'error',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
+			return;
+		}
+
 		const response = await fetch('http://localhost:5000/data/admin/categories', {
 			method: 'POST',
 			headers: {
@@ -203,7 +221,14 @@
 		});
 
 		if (!response.ok) {
-			console.error('Failed to add category');
+			toasts.error({
+				title: 'Error',
+				description: 'Failed to add category, please make sure you filled all the fields correctly',
+				type: 'error',
+				duration: 6000,
+				placement: 'bottom-center'
+			});
+			//console.error('Failed to add category');
 			return;
 		}
 
@@ -215,8 +240,8 @@
 			placement: 'bottom-center'
 		});
 
-		const data = await response.json();
-		console.log(data);
+		//await response.json();
+		//console.log(data);
 
 		newCategoryName = '';
 		await fetchCategoryData();
@@ -235,10 +260,11 @@
 					type="text"
 					bind:value={newCategoryName}
 					placeholder="Enter category name"
-					class="border p-2 rounded mr-2 mb-4"
+					class="border p-2 rounded mr-2"
 				/>
+				<small class="text text-rose-600 pt-2">{validationError}</small>
 			</div>
-			<button type="submit" class="bg-blue-500 text-white p-2 rounded">Add Category</button>
+			<button type="submit" class="bg-blue-500 text-white p-2 mt-4 rounded">Add Category</button>
 		</form>
 		<div class="grid grid-cols-6 gap-1 w-full overflow-auto">
 			<div class="col-start-1 col-span-5 bg-gray-300 p-2 sticky top-0 font-bold">Category</div>

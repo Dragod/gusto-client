@@ -260,7 +260,7 @@
 
 	<hr class="border-t-2 border-gray-200 p-1" />
 	{#if activeButton === 'updateMenu'}
-		<div class="update-menu flex flex-col overflow-auto p-1">
+		<div class="update-menu flex flex-col overflow-auto">
 			<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Menu</h1>
 			<div class="flex flex-col pb-6">
 				<label for="business" class="pb-2 text-sm font-medium text-gray-700">Business</label>
@@ -290,7 +290,7 @@
 				type="text"
 				bind:value={filter}
 				placeholder="Filter by name"
-				class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+				class="p-2 mt-1 mb-6 block w-full border rounded"
 			/>
 			<div class="flex-grow overflow-auto mb-6 h-full scrollbar">
 				<div class="grid grid-cols-11 gap-1 w-full">

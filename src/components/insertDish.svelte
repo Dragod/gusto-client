@@ -41,14 +41,14 @@
 
 		catData = await response.json(); // Assign the fetched data to catData
 		categories = catData.map((item) => item.category_name);
-		console.log('Categories:', categories);
+		//console.log('Categories:', categories);
 	}
 
 	/**
 	 * @param {string} categoryName
 	 */
 	async function getCatId(categoryName) {
-		console.log('Category name:', categoryName);
+		//console.log('Category name:', categoryName);
 		try {
 			const response = await fetch(
 				`http://localhost:5000/data/admin/catIdFromCatName?category_name=${encodeURIComponent(
@@ -67,10 +67,10 @@
 			}
 
 			const catId = await response.json();
-			console.log('Category id:', catId);
+			//console.log('Category id:', catId);
 			return catId[0].id.toString();
 		} catch (error) {
-			console.error('Failed to fetch category ID:', error);
+			//console.error('Failed to fetch category ID:', error);
 			toasts.error({
 				title: 'Insert dish',
 				description: 'Category name not selected. Please, make sure you selected a category.',
@@ -183,7 +183,7 @@
 		});
 
 		tags = await response.json();
-		console.log('Tags:', tags);
+		//console.log('Tags:', tags);
 	}
 
 	$: {
@@ -231,7 +231,7 @@
 			bind:value={dish.name}
 			type="text"
 			placeholder="Name of dish"
-			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+			class="p-2 mt-1 mb-6 block w-full border rounded"
 		/>
 		<label for="description" class="block text-sm font-medium text-gray-700">Description</label>
 		<input
@@ -239,7 +239,7 @@
 			bind:value={dish.description}
 			type="text"
 			placeholder="Description of dish"
-			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+			class="p-2 mt-1 mb-6 block w-full border rounded"
 		/>
 		<label for="price" class="block text-sm font-medium text-gray-700">Price</label>
 		<input
@@ -247,13 +247,13 @@
 			bind:value={dish.price}
 			type="number"
 			placeholder="Price you want to sell the dish for (€)"
-			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+			class="p-2 mt-1 mb-6 block w-full border rounded"
 		/>
 		<label for="category_id" class="block text-sm font-medium text-gray-700">Category name</label>
 		<select
 			bind:value={dish.categoryName}
 			id="category_id"
-			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+			class="p-2 mt-1 mb-6 block w-full border rounded"
 		>
 			<option value="">Select a category</option>
 			{#each categories as category}
