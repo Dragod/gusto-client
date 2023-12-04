@@ -158,12 +158,12 @@
 	/**
 	 * @param {number} id
 	 * @param {string} name
-	 * @description Can't use string literal in conjunction with @html
+	 * @description Can't use string literal in conjunction with @html also <strong> tag "/" is escaped or it thinks it's a regular expression
 	 */
 	async function deleteItem(id, name) {
 		openModal(
-			`Delete Category`,
-			'Are you sure you want to delete this category, <strong>' + name + '</strong>?',
+			'Delete Category',
+			'Are you sure you want to delete this category, <strong>' + name + '<' + '/strong>?',
 			() => {
 				deleteCategory(id);
 				toasts.success({
