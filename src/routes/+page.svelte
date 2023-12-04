@@ -1,7 +1,6 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts, ToastContainer, FlatToast } from 'svelte-toasts';
-	import { fade } from 'svelte/transition';
 	import schema from '../validation/update-dish';
 	import NavButtons from '../components/navButtons.svelte';
 	import InsertDish from '../components/insertDish.svelte';
@@ -261,7 +260,7 @@
 
 	<hr class="border-t-2 border-gray-200 p-1" />
 	{#if activeButton === 'updateMenu'}
-		<div class="update-menu flex flex-col overflow-auto p-1" transition:fade={{ duration: 200 }}>
+		<div class="update-menu flex flex-col overflow-auto p-1">
 			<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Menu</h1>
 			<div class="flex flex-col pb-6">
 				<label for="business" class="pb-2 text-sm font-medium text-gray-700">Business</label>

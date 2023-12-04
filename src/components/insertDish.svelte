@@ -1,7 +1,6 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
-	import { fade } from 'svelte/transition';
 	import schema from '../validation/insert-dish';
 	/**
 	 * @type {{name: string, description: string, price: string, is_pizza: string, tags: string[], categoryName: string, businessId: number}}
@@ -192,7 +191,7 @@
 	}
 </script>
 
-<div class="flex flex-col h-full overflow-auto" transition:fade={{ duration: 200 }}>
+<div class="flex flex-col overflow-auto">
 	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
 	<form
 		class="flex-grow overflow-auto mb-6 h-full"

@@ -1,11 +1,39 @@
 <script lang="jsdoc">
-	import { fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
+
+	/**
+	 * @type {any[]}
+	 */
+	let businesses = [];
+
+	onMount(async () => {
+		const res = await fetch('http://localhost:5000/data/admin/business');
+		businesses = await res.json();
+	});
 </script>
 
-<div class="flex flex-col" transition:fade={{ duration: 200 }}>
-	<h1 class="text-2xl font-semibold text-gray-800">Business</h1>
-	<hr class="border-t border-gray-300 my-2" />
-	<p>Business content here</p>
+<div class="flex flex-col overflow-auto">
+	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Business</h1>
+	<div class="flex overflow-auto mb-6">
+		<div class="grid grid-cols-9 gap-1 w-full overflow-auto">
+			<div class="col-start-1 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Name</div>
+			<div class="col-start-2 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">City</div>
+			<div class="col-start-3 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Address</div>
+			<div class="col-start-5 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Cap</div>
+			<div class="col-start-6 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Province</div>
+			<div class="col-start-7 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Phone</div>
+			<div class="col-start-8 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Email</div>
+			{#each businesses as business (business.id)}
+				<div class="col-start-1 col-span-1 p-2">{business.name}</div>
+				<div class="col-start-2 col-span-1 p-2">{business.city}</div>
+				<div class="col-start-3 col-span-2 p-2">{business.address}</div>
+				<div class="col-start-5 col-span-1 p-2">{business.cap}</div>
+				<div class="col-start-6 col-span-1 p-2">{business.province}</div>
+				<div class="col-start-7 col-span-1 p-2">{business.phone_number}</div>
+				<div class="col-start-8 col-span-2 p-2">{business.email}</div>
+			{/each}
+		</div>
+	</div>
 </div>
 
 <style></style>

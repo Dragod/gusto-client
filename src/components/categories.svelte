@@ -1,7 +1,6 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
-	import { fade } from 'svelte/transition';
 	import schema from '../validation/categories-update';
 	import { openModal } from '../store/modal';
 	import Modal from './modal.svelte';
@@ -194,9 +193,9 @@
 
 <Modal />
 
-<div class="flex flex-col overflow-auto h-full" transition:fade={{ duration: 200 }}>
+<div class="flex flex-col overflow-auto">
 	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Categories</h1>
-	<div class="flex flex-grow overflow-auto mb-6 h-full">
+	<div class="flex overflow-auto mb-6">
 		<div class="grid grid-cols-6 gap-1 w-full overflow-auto">
 			<div class="col-start-1 col-span-5 bg-gray-300 p-2 sticky top-0 font-bold">Category</div>
 			<div class="col-start-6 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Actions</div>
