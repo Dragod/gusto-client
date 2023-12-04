@@ -1,12 +1,14 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts, ToastContainer, FlatToast } from 'svelte-toasts';
+	import { fade } from 'svelte/transition';
 	import schema from '../validation/update-dish';
 	import NavButtons from '../components/navButtons.svelte';
 	import InsertDish from '../components/insertDish.svelte';
 	import Business from '../components/business.svelte';
 	import SortBy from '../components/sortBy.svelte';
 	import Categories from '../components/categories.svelte';
+	import Tags from '../components/tags.svelte';
 	import Modal from '../components/modal.svelte';
 	import { openModal } from '../store/modal';
 	import { dataSort, selectedBusiness, sortBy } from '../store/sortBy';
@@ -162,9 +164,8 @@
 
 	/**
 	 * @param {number} delete_id
-	 * @param {string} name
 	 */
-	async function deleteDish(delete_id, name) {
+	async function deleteDish(delete_id) {
 		const response = await fetch(`http://localhost:5000/data/admin/menu/${delete_id}`, {
 			method: 'DELETE'
 		});
@@ -172,13 +173,6 @@
 		if (response.ok) {
 			// Refresh the list after successful delete
 			await getMenu();
-			toasts.success({
-				title: 'Delete dish',
-				description: 'Dish deleted successfully.' + name,
-				type: 'info',
-				duration: 6000,
-				placement: 'bottom-center'
-			});
 		} else {
 			console.error('Failed to delete dish');
 			toasts.error({
@@ -197,14 +191,27 @@
 	 */
 	async function deleteItem(id, name) {
 		openModal(
-			'Delete dish',
-			`Are you sure you want to delete this item: <strong>${name}<strong> ?`,
+			`Delete dish: ${name}`,
+			'Are you sure you want to <strong>delete</strong> dish, <strong>' + name + '</strong>?',
 			() => {
 				// Code to delete the item goes here
-				deleteDish(id, name);
+				deleteDish(id);
+				toasts.success({
+					title: 'Delete dish',
+					description: `Dish deleted successfully, ${name}`,
+					type: 'success',
+					duration: 6000,
+					placement: 'bottom-center'
+				});
 			},
 			() => {
-				// Code to run if the user clicks "No" goes here
+				toasts.info({
+					title: 'Delete cancelled',
+					description: `Dish, ${name}, not deleted.`,
+					type: 'info',
+					duration: 6000,
+					placement: 'bottom-center'
+				});
 			}
 		);
 	}
@@ -251,7 +258,7 @@
 		<div class="update-menu flex flex-col overflow-auto p-1">
 			<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Menu</h1>
 			<div class="flex flex-col pb-6">
-				<label for="business" class="pb-2 text-sm font-medium">Business</label>
+				<label for="business" class="pb-2 text-sm font-medium text-gray-700">Business</label>
 				<div class="flex flex-row">
 					<button
 						class={`mr-4 px-2 py-1 rounded ${
@@ -592,6 +599,9 @@
 	{/if}
 	{#if activeButton === 'updateBusiness'}
 		<Business />
+	{/if}
+	{#if activeButton === 'tags'}
+		<Tags />
 	{/if}
 </div>
 

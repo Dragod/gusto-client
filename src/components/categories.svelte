@@ -1,6 +1,7 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
+	import { fade } from 'svelte/transition';
 	import schema from '../validation/categories-update';
 	import { openModal } from '../store/modal';
 	import Modal from './modal.svelte';
@@ -157,16 +158,30 @@
 	/**
 	 * @param {number} id
 	 * @param {string} name
+	 * @description Cant ise string literal in conjunction with @html
 	 */
 	async function deleteItem(id, name) {
 		openModal(
 			`Delete Category`,
-			`Are you sure you want to delete this category: <strong>${name}</strong>?`,
+			'Are you sure you want to delete this category, <strong>' + name + '</strong>?',
 			() => {
 				deleteCategory(id);
+				toasts.success({
+					title: 'Success',
+					description: `${name}, category was deleted successfully`,
+					type: 'success',
+					duration: 6000,
+					placement: 'bottom-center'
+				});
 			},
 			() => {
-				console.log('No clicked');
+				toasts.info({
+					title: 'Delete cancelled',
+					description: `${name},category was NOT deleted`,
+					type: 'info',
+					duration: 6000,
+					placement: 'bottom-center'
+				});
 			}
 		);
 	}

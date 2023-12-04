@@ -1,6 +1,7 @@
 <script lang="jsdoc">
 	import { onMount } from 'svelte';
 	import { toasts } from 'svelte-toasts';
+	import { fade } from 'svelte/transition';
 	import schema from '../validation/insert-dish';
 	/**
 	 * @type {{name: string, description: string, price: string, is_pizza: string, tags: string[], categoryName: string, businessId: number}}
@@ -191,117 +192,121 @@
 	}
 </script>
 
-<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
-<form
-	class="flex-grow overflow-auto mb-6 h-full"
-	on:submit|preventDefault={() => {
-		insertDish();
-	}}
->
-	<label for="business_id" class="block text-sm font-medium text-gray-700 mb-4"
-		>Business location</label
+<div class="flex flex-col h-full overflow-auto" transition:fade={{ duration: 100 }}>
+	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Insert dish</h1>
+	<form
+		class="flex-grow overflow-auto mb-6 h-full"
+		on:submit|preventDefault={() => {
+			insertDish();
+		}}
 	>
-	<label class="flex items-center mb-3 cursor-pointer">
-		<input
-			id="business_id_senigallia"
-			bind:group={dish.businessId}
-			type="radio"
-			value="1"
-			checked
-			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
-		/>
-		<span class="ml-2">Senigallia</span>
-	</label>
-
-	<label class="flex items-center mb-3 cursor-pointer">
-		<input
-			id="business_id_trecastelli"
-			bind:group={dish.businessId}
-			type="radio"
-			value="2"
-			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
-		/>
-		<span class="ml-2">Trecastelli</span>
-	</label>
-
-	<label for="dish" class="block text-sm font-medium text-gray-700">Name</label>
-	<input
-		id="dish"
-		bind:value={dish.name}
-		type="text"
-		placeholder="Name of dish"
-		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-	/>
-	<label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-	<input
-		id="description"
-		bind:value={dish.description}
-		type="text"
-		placeholder="Description of dish"
-		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-	/>
-	<label for="price" class="block text-sm font-medium text-gray-700">Price</label>
-	<input
-		id="price"
-		bind:value={dish.price}
-		type="number"
-		placeholder="Price you want to sell the dish for (€)"
-		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-	/>
-	<label for="category_id" class="block text-sm font-medium text-gray-700">Category name</label>
-	<select
-		bind:value={dish.categoryName}
-		id="category_id"
-		class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-	>
-		<option value="">Select a category</option>
-		{#each categories as category}
-			<option value={category}>{category}</option>
-		{/each}
-	</select>
-	<label for="is_pizza" class="block text-sm font-medium text-gray-700 mb-4"
-		>Is this new dish a pizza?</label
-	>
-	<label class="flex items-center mb-3 cursor-pointer">
-		<input
-			id="is_pizza_no"
-			bind:group={dish.is_pizza}
-			type="radio"
-			value="0"
-			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
-		/>
-		<span class="ml-2">No</span>
-	</label>
-	<label class="flex items-center mb-3 cursor-pointer">
-		<input
-			id="is_pizza_yes"
-			bind:group={dish.is_pizza}
-			type="radio"
-			value="1"
-			class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
-		/>
-		<span class="ml-2">Yes</span>
-	</label>
-	<label for="tags" class="mt-3 mb-4 block text-sm font-medium text-gray-700">Tags (optional)</label
-	>
-	{#each tags as tag (tag.id)}
+		<label for="business_id" class="block text-sm font-medium text-gray-700 mb-4"
+			>Business location</label
+		>
 		<label class="flex items-center mb-3 cursor-pointer">
 			<input
-				id={`category_id_${tag.tag_name}`}
-				type="checkbox"
-				value={tag.id}
-				bind:group={dish.tags}
-				class="appearance-none bg-white bg-check h-6 w-6 border border-gray-200 rounded-md checked:bg-blue-600 checked:border-transparent focus:outline-none"
+				id="business_id_senigallia"
+				bind:group={dish.businessId}
+				type="radio"
+				value="1"
+				checked
+				class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
 			/>
-			<span class="ml-2">{tag.tag_name}</span>
+			<span class="ml-2">Senigallia</span>
 		</label>
-	{/each}
-	<hr class="border-t-2 mt-8 border-gray-200 p-1" />
-	<button
-		type="submit"
-		class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded block mt-6">Insert new</button
-	>
-</form>
+
+		<label class="flex items-center mb-3 cursor-pointer">
+			<input
+				id="business_id_trecastelli"
+				bind:group={dish.businessId}
+				type="radio"
+				value="2"
+				class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
+			/>
+			<span class="ml-2">Trecastelli</span>
+		</label>
+
+		<label for="dish" class="block text-sm font-medium text-gray-700">Name</label>
+		<input
+			id="dish"
+			bind:value={dish.name}
+			type="text"
+			placeholder="Name of dish"
+			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+		/>
+		<label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+		<input
+			id="description"
+			bind:value={dish.description}
+			type="text"
+			placeholder="Description of dish"
+			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+		/>
+		<label for="price" class="block text-sm font-medium text-gray-700">Price</label>
+		<input
+			id="price"
+			bind:value={dish.price}
+			type="number"
+			placeholder="Price you want to sell the dish for (€)"
+			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+		/>
+		<label for="category_id" class="block text-sm font-medium text-gray-700">Category name</label>
+		<select
+			bind:value={dish.categoryName}
+			id="category_id"
+			class="p-2 mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+		>
+			<option value="">Select a category</option>
+			{#each categories as category}
+				<option value={category}>{category}</option>
+			{/each}
+		</select>
+		<label for="is_pizza" class="block text-sm font-medium text-gray-700 mb-4"
+			>Is this new dish a pizza?</label
+		>
+		<label class="flex items-center mb-3 cursor-pointer">
+			<input
+				id="is_pizza_no"
+				bind:group={dish.is_pizza}
+				type="radio"
+				value="0"
+				class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
+			/>
+			<span class="ml-2">No</span>
+		</label>
+		<label class="flex items-center mb-3 cursor-pointer">
+			<input
+				id="is_pizza_yes"
+				bind:group={dish.is_pizza}
+				type="radio"
+				value="1"
+				class="appearance-none h-6 w-6 rounded-full border border-gray-200 checked:border-transparent checked:bg-blue-600 focus:outline-none"
+			/>
+			<span class="ml-2">Yes</span>
+		</label>
+		<label for="tags" class="mt-3 mb-4 block text-sm font-medium text-gray-700"
+			>Tags (optional)</label
+		>
+		{#each tags as tag (tag.id)}
+			<label class="flex items-center mb-3 cursor-pointer">
+				<input
+					id={`category_id_${tag.tag_name}`}
+					type="checkbox"
+					value={tag.id}
+					bind:group={dish.tags}
+					class="appearance-none bg-white bg-check h-6 w-6 border border-gray-200 rounded-md checked:bg-blue-600 checked:border-transparent focus:outline-none"
+				/>
+				<span class="ml-2">{tag.tag_name}</span>
+			</label>
+		{/each}
+		<hr class="border-t-2 mt-8 border-gray-200 p-1" />
+		<button
+			type="submit"
+			class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded block mt-6"
+			>Insert new</button
+		>
+	</form>
+</div>
 
 <style>
 	.bg-check {

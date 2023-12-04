@@ -20,7 +20,7 @@
 	];
 </script>
 
-<label class="pb-2" for="sort">Sort by</label>
+<label class="pb-2 text-sm font-medium text-gray-700" for="sort">Sort by</label>
 <div class="flex flex-row">
 	{#each buttons as { sortType, label }}
 		<button

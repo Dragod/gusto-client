@@ -3,9 +3,9 @@
 </script>
 
 <div class="flex flex-col" transition:fade={{ duration: 100 }}>
-	<h1 class="text-2xl font-semibold text-gray-800">Business</h1>
+	<h1 class="text-2xl font-semibold text-gray-800">Tags</h1>
 	<hr class="border-t border-gray-300 my-2" />
-	<p>Business content here</p>
+	<p>Tags content here</p>
 </div>
 
 <style></style>
