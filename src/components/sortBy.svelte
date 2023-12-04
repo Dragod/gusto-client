@@ -7,10 +7,10 @@
 	 * <SortBy />
 	 */
 	import { sortBy, activeSort } from '../store/sortBy';
+	//{ sortType: 'highestPrice', label: 'Highest price' },
+	//{ sortType: 'lowestPrice', label: 'Lowest price' },
 	const buttons = [
 		{ sortType: 'default', label: 'Category' },
-		{ sortType: 'highestPrice', label: 'Highest price' },
-		{ sortType: 'lowestPrice', label: 'Lowest price' },
 		{ sortType: 'isPizza', label: 'Is pizza' },
 		{ sortType: 'newTag', label: 'NEW tag' },
 		{ sortType: 'cerTag', label: 'CER tag' },

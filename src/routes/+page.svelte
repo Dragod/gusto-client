@@ -34,11 +34,11 @@
 	let editingId = null;
 
 	/**
-	 * @type {{ name: string, description: string, price: string, is_pizza: string } | null}
+	 * @type {{ name: string, description: string, is_pizza: string, price: number } | null}
 	 */
 	let originalData = null;
 
-	let updatedData = { name: '', description: '', price: '', is_pizza: '' };
+	let updatedData = { name: '', description: '', is_pizza: '', price: '' };
 
 	let showError = false;
 
@@ -113,18 +113,47 @@
 						body: JSON.stringify(updatedData)
 					});
 
+					console.log('response', response);
+
 					if (!response.ok) {
 						throw new Error(`HTTP error! status: ${response.status}`);
 					} else {
-						console.log('Changes saved successfully');
-						toasts.success({
-							title: 'Success',
-							description: 'Menu changes saved.',
-							type: 'success',
-							duration: 6000,
-							placement: 'bottom-center'
-						});
+						console.log('Menu changes saved successfully');
 					}
+
+					console.log('updatedData', updatedData);
+					console.log('originalData', originalData);
+					console.log('updatedData.price', updatedData.price);
+
+					// If price is part of the updated data, make a separate request to update it
+					if ('price' in updatedData) {
+						const priceResponse = await fetch(
+							`http://localhost:5000/data/admin/business_menu/${$selectedBusiness}/${editingId}`,
+							{
+								method: 'PATCH',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({ price: updatedData.price })
+							}
+						);
+
+						console.log('priceResponse', priceResponse);
+
+						if (!priceResponse.ok) {
+							throw new Error(`HTTP error! status: ${priceResponse.status}`);
+						} else {
+							console.log('Price changes saved successfully');
+						}
+					}
+
+					toasts.success({
+						title: 'Success',
+						description: 'Changes saved.',
+						type: 'success',
+						duration: 6000,
+						placement: 'bottom-center'
+					});
 
 					//Refresh data
 					await getMenu();
@@ -132,7 +161,7 @@
 			}
 
 			editingId = null;
-			updatedData = { name: '', description: '', price: '', is_pizza: '' };
+			updatedData = { name: '', description: '', is_pizza: '', price: '' };
 			originalData = null;
 		} catch (error) {
 			console.error('Could not save changes, validation error/s.', error);

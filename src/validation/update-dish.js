@@ -8,7 +8,7 @@ const schema = Joi.object({
 		'string.max': 'Name must be at most 100 characters long.'
 	}),
 
-	description: Joi.string().min(10).max(500).trim().required().messages({
+	description: Joi.string().min(10).max(200).trim().empty('').optional().messages({
 		'string.base': 'Description must be a string.',
 		'string.empty': 'Please enter a description.',
 		'string.min': 'Description must be at least 10 characters long.',
