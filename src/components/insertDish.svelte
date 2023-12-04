@@ -3,12 +3,12 @@
 	import { toasts } from 'svelte-toasts';
 	import schema from '../validation/insert-dish';
 	/**
-	 * @type {{name: string, description: string, price: string, is_pizza: string, tags: string[], categoryName: string, businessId: number}}
+	 * @type {{name: string, description: string, price: number | null, is_pizza: string, tags: string[], categoryName: string, businessId: number}}
 	 */
 	let dish = {
 		name: '',
 		description: '',
-		price: '',
+		price: null,
 		is_pizza: '0',
 		tags: [],
 		categoryName: '',
@@ -185,7 +185,7 @@
 			dish = {
 				name: '',
 				description: '',
-				price: '',
+				price: null,
 				is_pizza: '0',
 				tags: [],
 				categoryName: '',

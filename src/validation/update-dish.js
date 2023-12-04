@@ -15,7 +15,7 @@ const schema = Joi.object({
 		'string.max': 'Description must be at most 500 characters long.'
 	}),
 
-	price: Joi.number().integer().min(1).max(99).required().messages({
+	price: Joi.number().greater(0).less(99).required().messages({
 		'number.base': 'Price must be a number.',
 		'number.empty': 'Please enter a price.',
 		'number.min': 'Price must be at least 1.',
