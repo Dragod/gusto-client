@@ -34,8 +34,8 @@
 		{ state: 'updateMenu', label: 'Menu', refresh: true },
 		{ state: 'addDish', label: 'Insert New' },
 		{ state: 'addRemoveCategory', label: 'Categories' },
-		{ state: 'updateBusiness', label: 'Business' },
-		{ state: 'tags', label: 'Tags' }
+		{ state: 'tags', label: 'Tags' },
+		{ state: 'updateBusiness', label: 'Business' }
 	];
 </script>
 
