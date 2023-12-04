@@ -158,7 +158,7 @@
 	/**
 	 * @param {number} id
 	 * @param {string} name
-	 * @description Cant ise string literal in conjunction with @html
+	 * @description Can't use string literal in conjunction with @html
 	 */
 	async function deleteItem(id, name) {
 		openModal(
