@@ -189,6 +189,38 @@
 			}
 		);
 	}
+
+	let newCategoryName = '';
+
+	async function addCategory() {
+		const businessIds = [1, 2];
+		const response = await fetch('http://localhost:5000/data/admin/categories', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ categoryName: newCategoryName, businessIds })
+		});
+
+		if (!response.ok) {
+			console.error('Failed to add category');
+			return;
+		}
+
+		toasts.success({
+			title: 'Success',
+			description: `Category ${newCategoryName} added successfully`,
+			type: 'success',
+			duration: 6000,
+			placement: 'bottom-center'
+		});
+
+		const data = await response.json();
+		console.log(data);
+
+		newCategoryName = '';
+		await fetchCategoryData();
+	}
 </script>
 
 <Modal />
@@ -196,6 +228,18 @@
 <div class="flex flex-col overflow-auto">
 	<h1 class="text-2xl font-bold text-gray-800 mb-4 mr-10 p-1">Categories</h1>
 	<div class="flex overflow-auto mb-6">
+		<form on:submit|preventDefault={addCategory}>
+			<div class="flex flex-col pr-8">
+				<label for="categoryName" class="mr-2">Insert new category</label>
+				<input
+					type="text"
+					bind:value={newCategoryName}
+					placeholder="Enter category name"
+					class="border p-2 rounded mr-2 mb-4"
+				/>
+			</div>
+			<button type="submit" class="bg-blue-500 text-white p-2 rounded">Add Category</button>
+		</form>
 		<div class="grid grid-cols-6 gap-1 w-full overflow-auto">
 			<div class="col-start-1 col-span-5 bg-gray-300 p-2 sticky top-0 font-bold">Category</div>
 			<div class="col-start-6 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Actions</div>
