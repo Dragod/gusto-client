@@ -14,6 +14,31 @@
 		categoryName: '',
 		businessId: 1
 	};
+
+	/**
+	 * @typedef {Object} Errors
+	 * @property {string} name
+	 * @property {string} description
+	 * @property {string} price
+	 * @property {string} is_pizza
+	 * @property {string} tags
+	 * @property {string} categoryName
+	 * @property {string} businessId
+	 * @property {string} categoryId
+	 */
+
+	/** @type {Errors} */
+	let errors = {
+		name: '',
+		description: '',
+		price: '',
+		is_pizza: '',
+		tags: '',
+		categoryName: '',
+		businessId: '',
+		categoryId: ''
+	};
+
 	/**
 	 * @type {any[]}
 	 */
@@ -105,28 +130,31 @@
 	async function insertDish() {
 		const categoryId = await getCatId(dish.categoryName);
 
-		if (categoryId === null) {
-			console.error('Failed to get category ID');
-			return;
-		}
-
 		// Create a new object with the dish data and the category ID
 		const dishToInsert = { ...dish, categoryId: categoryId };
 
 		console.log('Sending payload:', dishToInsert);
 
+		// Clear the errors object
+		for (let key in errors) {
+			const errorKey = /** @type {keyof Errors} */ (key);
+			errors[errorKey] = '';
+		}
+
 		// Validate the dishToInsert object
-		const { error } = schema.validate(dishToInsert);
+		const { error } = schema.validate(dishToInsert, { abortEarly: false });
 		if (error) {
 			console.error('Validation error:', error.details[0].message);
-			toasts.error({
-				title: 'Validation Error',
-				description: error.details[0].message,
-				type: 'error',
-				duration: 6000,
-				placement: 'bottom-center'
-			});
-			return;
+
+			// Create a new errors object with all error messages
+			const newErrors = error.details.reduce((acc, detail) => {
+				const errorField = detail.path[0]; // Get the field that caused the error
+				acc[/** @type {keyof Errors} */ (errorField)] = detail.message; // Set the error message for that field
+				return acc;
+			}, /** @type {Errors} */ ({}));
+
+			errors = newErrors; // Assign the new errors object to errors
+			console.log('Errors:', errors);
 		}
 
 		const response = await fetch('http://localhost:5000/data/admin/menu', {
@@ -167,6 +195,8 @@
 			});
 		}
 	}
+
+	$: console.log(errors); // This will run whenever the errors object changes
 
 	/**
 	 * An array of tags. Each tag is an object with an `id` and a `tag_name`.
@@ -231,36 +261,51 @@
 			bind:value={dish.name}
 			type="text"
 			placeholder="Name of dish"
-			class="p-2 mt-1 mb-6 block w-full border rounded"
+			class="p-2 mt-1 block w-full border rounded"
 		/>
-		<label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+		{#if errors.name}
+			<small class="text text-rose-600">{errors.name}</small>
+		{/if}
+		<label for="description" class="block text-sm font-medium text-gray-700 mt-3">Description</label
+		>
 		<input
 			id="description"
 			bind:value={dish.description}
 			type="text"
 			placeholder="Description of dish"
-			class="p-2 mt-1 mb-6 block w-full border rounded"
+			class="p-2 mt-1 block w-full border rounded"
 		/>
-		<label for="price" class="block text-sm font-medium text-gray-700">Price</label>
+		{#if errors.description}
+			<small class="text text-rose-600">{errors.description}</small>
+		{/if}
+		<label for="price" class="block text-sm font-medium text-gray-700 mt-3">Price</label>
 		<input
 			id="price"
 			bind:value={dish.price}
 			type="number"
 			placeholder="Price you want to sell the dish for (€)"
-			class="p-2 mt-1 mb-6 block w-full border rounded"
+			class="p-2 mt-1 block w-full border rounded"
 		/>
-		<label for="category_id" class="block text-sm font-medium text-gray-700">Category name</label>
+		{#if errors.price}
+			<small class="text text-rose-600">{errors.price}</small>
+		{/if}
+		<label for="category_id" class="block text-sm font-medium text-gray-700 mt-3"
+			>Category name</label
+		>
 		<select
 			bind:value={dish.categoryName}
 			id="category_id"
-			class="p-2 mt-1 mb-6 block w-full border rounded"
+			class="p-2 mt-1 block w-full border rounded"
 		>
 			<option value="">Select a category</option>
 			{#each categories as category}
 				<option value={category}>{category}</option>
 			{/each}
 		</select>
-		<label for="is_pizza" class="block text-sm font-medium text-gray-700 mb-4"
+		{#if errors.categoryName}
+			<small class="text text-rose-600">{errors.categoryName}</small>
+		{/if}
+		<label for="is_pizza" class="block text-sm font-medium text-gray-700 mb-4 mt-3"
 			>Is this new dish a pizza?</label
 		>
 		<label class="flex items-center mb-3 cursor-pointer">
