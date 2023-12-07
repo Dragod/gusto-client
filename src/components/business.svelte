@@ -24,13 +24,15 @@
 			<div class="col-start-7 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Phone</div>
 			<div class="col-start-8 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Email</div>
 			{#each businesses as business (business.id)}
-				<div class="col-start-1 col-span-1 p-2">{business.name}</div>
-				<div class="col-start-2 col-span-1 p-2">{business.city}</div>
-				<div class="col-start-3 col-span-2 p-2">{business.address}</div>
-				<div class="col-start-5 col-span-1 p-2">{business.cap}</div>
-				<div class="col-start-6 col-span-1 p-2">{business.province}</div>
-				<div class="col-start-7 col-span-1 p-2">{business.phone_number}</div>
-				<div class="col-start-8 col-span-2 p-2">{business.email}</div>
+				<div class="col-start-1 col-span-1 p-2 bg-slate-100 min-h-[60px]">{business.name}</div>
+				<div class="col-start-2 col-span-1 p-2 bg-slate-100 min-h-[60px]">{business.city}</div>
+				<div class="col-start-3 col-span-2 p-2 bg-slate-100 min-h-[60px]">{business.address}</div>
+				<div class="col-start-5 col-span-1 p-2 bg-slate-100 min-h-[60px]">{business.cap}</div>
+				<div class="col-start-6 col-span-1 p-2 bg-slate-100 min-h-[60px]">{business.province}</div>
+				<div class="col-start-7 col-span-1 p-2 bg-slate-100 min-h-[60px]">
+					{business.phone_number}
+				</div>
+				<div class="col-start-8 col-span-2 p-2 bg-slate-100 min-h-[60px]">{business.email}</div>
 			{/each}
 		</div>
 	</div>

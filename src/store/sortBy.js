@@ -9,7 +9,7 @@ const partialEndpoint = `http://localhost:5000/data/admin/menu`;
 /**
  * Sorts the data from the specified endpoint based on the active sort.
  * @param {string} sortType - The active sort to apply to the data.
- * @returns {Promise<void>} - A promise that resolves when the data is sorted.
+ * @returns {Promise<any[]>} - A promise that resolves when the data is sorted.
  */
 export async function sortBy(sortType) {
 	const business = get(selectedBusiness);
@@ -52,4 +52,6 @@ export async function sortBy(sortType) {
 	const data = await response.json();
 	dataSort.set(data);
 	activeSort.set(sortType);
+
+	return data;
 }

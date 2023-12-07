@@ -38,13 +38,32 @@
 	 */
 	let originalData = null;
 
-	let updatedData = { name: '', description: '', is_pizza: '', price: '' };
+	let updatedData = {
+		name: '',
+		description: '',
+		is_pizza: '',
+		price: '',
+		category_id: 0,
+		category_name: ''
+	};
 
 	let showError = false;
 
+	let isLoading = false;
+
 	async function getMenu() {
 		try {
-			await sortBy('default');
+			/**
+			 * @type {any[]}
+			 */
+			const menu = await sortBy('default');
+			updatedData.category_id = menu[0].category_id;
+			console.log('menu', menu);
+			console.log('updatedData.category_id', updatedData.category_id);
+			console.log(
+				'category_id of all items:',
+				menu.map((item) => item.category_id)
+			);
 		} catch (error) {
 			console.error(error);
 		}
@@ -70,7 +89,8 @@
 	 * @param {number} id
 	 * @param {number} businessId
 	 */
-	function startEditing(id, businessId) {
+	async function startEditing(id, businessId) {
+		categoryNames = await fetchCategoryData();
 		showError = false;
 		const dish = data.find((item) => item.id === id);
 		editingId = id;
@@ -78,7 +98,29 @@
 		updatedData = { ...dish, businessId };
 	}
 
+	/**
+	 * @type {any[]}
+	 */
+	let categoryData = [];
+
+	/**
+	 * @type {any[]}
+	 */
+	let categoryNames = [];
+
+	// Fetch categories and set category_id to the id of the first category
+	selectedBusiness.subscribe(() => {
+		fetchCategoryData().then((categories) => {
+			if (categories.length > 0) {
+				updatedData.category_id = categories[0].id;
+			}
+		});
+	});
+
 	async function stopEditing() {
+		categoryNames = await fetchCategoryData();
+		console.log('PATCH request body:', updatedData);
+
 		showError = true;
 		try {
 			if (editingId === null) {
@@ -157,11 +199,19 @@
 
 					//Refresh data
 					await getMenu();
+					await fetchCategoryData();
 				}
 			}
 
 			editingId = null;
-			updatedData = { name: '', description: '', is_pizza: '', price: '' };
+			updatedData = {
+				name: '',
+				description: '',
+				is_pizza: '',
+				price: '',
+				category_id: 0,
+				category_name: ''
+			};
 			originalData = null;
 		} catch (error) {
 			console.error('Could not save changes, validation error/s.', error);
@@ -249,6 +299,62 @@
 			}
 		);
 	}
+
+	$: {
+		console.log('selectBusiness', $selectedBusiness);
+	}
+
+	async function fetchCategoryData() {
+		isLoading = true;
+		try {
+			const response = await fetch(
+				`http://localhost:5000/data/admin/category-by-business/${$selectedBusiness}`
+			);
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			categoryData = await response.json();
+		} catch (error) {
+			console.error('Failed to fetch category data:', error);
+		} finally {
+			isLoading = false;
+		}
+		return categoryData;
+	}
+
+	$: {
+		(async () => {
+			categoryNames = await fetchCategoryData();
+		})();
+	}
+
+	/**
+	 * @type {any}
+	 */
+	let selectedCategory;
+
+	/**
+	 * Updates the category name in updatedData based on the selected category ID.
+	 *
+	 * @param {Event} event - The event object from the select element's change event.
+	 */
+	function updateCategoryName(event) {
+		if (event.target instanceof HTMLSelectElement) {
+			const selectedCategoryName = event.target.value;
+			console.log('selectedCategoryName:', selectedCategoryName); // Log selectedCategoryName
+
+			const selectedCategory = categoryNames.find(
+				(category) => category.category_name === selectedCategoryName
+			);
+			console.log('selectedCategory:', selectedCategory); // Log selectedCategory
+			console.log('selectedCategory.category_id:', selectedCategory?.category_id); // Log selectedCategory.category_id
+
+			if (selectedCategory) {
+				updatedData.category_id = selectedCategory.category_id;
+				console.log('updatedData.category_id:', updatedData.category_id); // Log updatedData.category_id
+			}
+		}
+	}
 </script>
 
 <Modal />
@@ -327,10 +433,10 @@
 					<div class="col-start-3 col-span-3 bg-gray-300 p-2 sticky top-0 font-bold">
 						Description
 					</div>
-					<div class="col-start-6 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Price - €</div>
-					<div class="col-start-7 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Is pizza</div>
+					<div class="col-start-6 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Category</div>
 					<div class="col-start-8 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Tags</div>
-					<div class="col-start-9 col-span-2 bg-gray-300 p-2 sticky top-0 font-bold">Category</div>
+					<div class="col-start-9 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Price - €</div>
+					<div class="col-start-10 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Is pizza</div>
 					<div class="col-start-11 col-span-1 bg-gray-300 p-2 sticky top-0 font-bold">Actions</div>
 					{#each filteredData as item, index (index)}
 						<div
@@ -374,6 +480,43 @@
 						<div
 							class={`bg-gray-${
 								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-2 p-2 min-h-[60px]`}
+						>
+							{#if editingId === item.id}
+								<select
+									bind:value={updatedData.category_name}
+									on:change={updateCategoryName}
+									class="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+								>
+									{#each categoryNames as category, i (i)}
+										<option value={category.category_name}>{category.category_name}</option>
+									{/each}
+								</select>
+							{:else}
+								{item.category_name}
+							{/if}
+						</div>
+						<!-- <div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-2 p-2 min-h-[60px]`}
+						>
+							{item.category_name}
+						</div> -->
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
+							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
+						>
+							{#if item.tags == null}
+								No tags
+							{:else}
+								{item.tags.replace(/,/g, ', ')}
+							{/if}
+						</div>
+						<div
+							class={`bg-gray-${
+								index % 2 === 0 ? '100' : '200'
 							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
 						>
 							{#if editingId === item.id}
@@ -408,24 +551,6 @@
 							{:else}
 								{item.is_pizza}
 							{/if}
-						</div>
-						<div
-							class={`bg-gray-${
-								index % 2 === 0 ? '100' : '200'
-							} bg-slate-100 col-span-1 p-2 min-h-[60px]`}
-						>
-							{#if item.tags == null}
-								No tags
-							{:else}
-								{item.tags}
-							{/if}
-						</div>
-						<div
-							class={`bg-gray-${
-								index % 2 === 0 ? '100' : '200'
-							} bg-slate-100 col-span-2 p-2 min-h-[60px]`}
-						>
-							{item.category_name}
 						</div>
 						<div
 							class={`bg-gray-${

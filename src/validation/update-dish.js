@@ -40,6 +40,8 @@ const schema = Joi.object({
 
 	category_name: Joi.string().optional(),
 
+	category_id: Joi.number().optional(),
+
 	businessId: Joi.number().optional()
 });
 

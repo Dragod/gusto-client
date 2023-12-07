@@ -200,6 +200,8 @@
 		const businessIds = [1, 2];
 		const categoryData = { categoryName: newCategoryName, businessIds };
 
+		console.log(JSON.stringify(categoryData));
+
 		validateCategoryName();
 		if (validationError) {
 			toasts.error({
@@ -255,7 +257,8 @@
 	<div class="flex overflow-auto mb-6">
 		<form on:submit|preventDefault={addCategory}>
 			<div class="flex flex-col pr-8">
-				<label for="categoryName" class="mr-2">Insert new category</label>
+				<h2 class="text-1xl font-bold text-gray-800 pb-4">Insert new category</h2>
+				<label for="categoryName" class="mr-2">Category name</label>
 				<input
 					type="text"
 					bind:value={newCategoryName}
